@@ -1,43 +1,61 @@
 export default function Controls({
   isMuted,
   isCameraOff,
+  isScreenSharing,
   toggleMute,
   toggleCamera,
-  leaveMeeting
+  toggleScreenShare,
+  toggleChat,
+  leaveMeeting,
 }) {
   return (
-    <div style={styles.controls}>
-      <button onClick={toggleMute} style={styles.btn}>
-        {isMuted ? "Unmute" : "Mute"}
+    <div className="controls">
+      <button
+        onClick={toggleMute}
+        className={`control-btn ${isMuted ? "active-warning" : "default"}`}
+        title={isMuted ? "Unmute microphone" : "Mute microphone"}
+      >
+        {isMuted ? "🔇" : "🎤"}
+        <span>{isMuted ? "Unmute" : "Mute"}</span>
       </button>
 
-      <button onClick={toggleCamera} style={styles.btn}>
-        {isCameraOff ? "Camera ON" : "Camera OFF"}
+      <button
+        onClick={toggleCamera}
+        className={`control-btn ${isCameraOff ? "active-warning" : "default"}`}
+        title={isCameraOff ? "Turn on camera" : "Turn off camera"}
+      >
+        {isCameraOff ? "📹" : "📷"}
+        <span>{isCameraOff ? "Camera ON" : "Camera OFF"}</span>
       </button>
 
-      <button onClick={leaveMeeting} style={styles.leaveBtn}>
-        Leave
+      <button
+        onClick={toggleScreenShare}
+        className={`control-btn ${
+          isScreenSharing ? "active-orange" : "default"
+        }`}
+        title={isScreenSharing ? "Stop screen share" : "Start screen share"}
+      >
+        {isScreenSharing ? "⏹️" : "📺"}
+        <span>{isScreenSharing ? "Stop Share" : "Share Screen"}</span>
+      </button>
+
+      <button
+        onClick={toggleChat}
+        className="control-btn default"
+        title="Toggle chat panel"
+      >
+        💬
+        <span>Chat</span>
+      </button>
+
+      <button
+        onClick={leaveMeeting}
+        className="control-btn leave"
+        title="Leave meeting"
+      >
+        ☎️
+        <span>Leave</span>
       </button>
     </div>
   );
 }
-
-const styles = {
-  controls: {
-    display: "flex",
-    justifyContent: "center",
-    gap: "15px",
-    marginTop: "20px"
-  },
-  btn: {
-    padding: "10px 15px",
-    cursor: "pointer"
-  },
-  leaveBtn: {
-    padding: "10px 15px",
-    background: "#e53935",
-    color: "#fff",
-    border: "none",
-    cursor: "pointer"
-  }
-};

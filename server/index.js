@@ -44,7 +44,7 @@ io.on("connection", (socket) => {
   // PRODUCE (client sends audio/video)
   socket.on(
     "produce",
-    async ({ transportId, kind, rtpParameters }, callback) => {
+    async ({ transportId, kind, rtpParameters, isScreenShare }, callback) => {
       try {
         const room = getRoom(socket.roomId);
         if (!room) {
@@ -77,6 +77,7 @@ io.on("connection", (socket) => {
           producerId: producer.id,
           peerId: socket.id,
           kind,
+          isScreenShare: isScreenShare || false,
         });
         console.log(
           `📢 Sent new-producer to room ${
@@ -84,7 +85,7 @@ io.on("connection", (socket) => {
           }: ${producer.id.substring(0, 8)} from peer ${socket.id.substring(
             0,
             8
-          )}`
+          )} (screenShare: ${isScreenShare || false})`
         );
 
         callback({ id: producer.id });
@@ -211,28 +212,74 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("join-room", async (roomId) => {
+  socket.on("join-room", async ({ roomId, userName }) => {
     const room = await createRoom(roomId, worker, createRouter);
 
     room.peers.set(socket.id, {
       socket,
+      userName: userName || "Guest",
       transports: [],
       producers: [],
       consumers: [],
     });
 
     socket.roomId = roomId;
+    socket.userName = userName || "Guest";
 
     // ✅ Join socket.io room so broadcasts work
     socket.join(roomId);
-    console.log(`✅ Socket ${socket.id.substring(0, 8)} joined room ${roomId}`);
+    console.log(
+      `✅ Socket ${socket.id.substring(
+        0,
+        8
+      )} (${userName}) joined room ${roomId}`
+    );
+
+    // ✅ Notify all peers about new participant
+    io.to(roomId).emit("participant-joined", {
+      participantCount: room.peers.size,
+    });
 
     socket.emit("router-rtp-capabilities", room.router.rtpCapabilities);
+  });
+
+  // 💬 Chat message handler
+  socket.on("chat-message", ({ message, senderName, timestamp }) => {
+    const roomId = socket.roomId;
+    if (roomId) {
+      // Broadcast message to all peers in the room
+      io.to(roomId).emit("chat-message", {
+        senderId: socket.id,
+        senderName: senderName || socket.userName || "Guest",
+        message,
+        timestamp,
+      });
+      console.log(
+        `💬 Chat from ${socket.userName} (${socket.id.substring(
+          0,
+          8
+        )}): ${message.substring(0, 50)}`
+      );
+    }
+  });
+
+  // 📺 Screen share stopped handler
+  socket.on("screen-share-stopped", () => {
+    const roomId = socket.roomId;
+    if (roomId) {
+      // Broadcast to all peers in the room except sender
+      socket.to(roomId).emit("screen-share-stopped", {
+        peerId: socket.id,
+      });
+      console.log(`🛑 Screen share stopped by ${socket.id.substring(0, 8)}`);
+    }
   });
 
   socket.on("disconnect", () => {
     const roomId = socket.roomId;
     if (roomId) {
+      const room = getRoom(roomId);
+
       // ✅ Notify others that this peer is leaving
       socket.to(roomId).emit("peer-left", {
         peerId: socket.id,
@@ -240,6 +287,13 @@ io.on("connection", (socket) => {
       console.log(`📢 Peer ${socket.id.substring(0, 8)} left room ${roomId}`);
 
       removePeer(roomId, socket.id);
+
+      // ✅ Update participant count for remaining peers
+      if (room && room.peers.size > 0) {
+        socket.to(roomId).emit("participant-left", {
+          participantCount: room.peers.size,
+        });
+      }
     }
   });
 });
