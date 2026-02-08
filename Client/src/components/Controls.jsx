@@ -6,6 +6,7 @@ export default function Controls({
   toggleCamera,
   toggleScreenShare,
   toggleChat,
+  showChat,
   leaveMeeting,
 }) {
   return (
@@ -41,11 +42,11 @@ export default function Controls({
 
       <button
         onClick={toggleChat}
-        className="control-btn default"
-        title="Toggle chat panel"
+        className={`control-btn ${showChat ? "active-warning" : "default"}`}
+        title={showChat ? "Close chat panel" : "Open chat panel"}
       >
         💬
-        <span>Chat</span>
+        <span>{showChat ? "Close Chat" : "Chat"}</span>
       </button>
 
       <button

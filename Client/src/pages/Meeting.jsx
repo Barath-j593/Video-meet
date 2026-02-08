@@ -720,7 +720,7 @@ export default function Meeting() {
         style={{
           display:
             remoteScreenStreams.length === 0 || fullscreenMode === "meeting"
-              ? "block"
+              ? "flex"
               : "none",
         }}
       >
@@ -834,7 +834,11 @@ export default function Meeting() {
         toggleMute={toggleMute}
         toggleCamera={toggleCamera}
         toggleScreenShare={toggleScreenShare}
-        toggleChat={() => setShowChat(!showChat)}
+        toggleChat={() => {
+          console.log("🎯 Chat button clicked! Current showChat:", showChat);
+          setShowChat(!showChat);
+        }}
+        showChat={showChat}
         leaveMeeting={leaveMeeting}
       />
     </div>
