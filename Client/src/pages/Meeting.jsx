@@ -4,6 +4,7 @@ import { io } from "socket.io-client";
 import * as mediasoupClient from "mediasoup-client";
 import Controls from "../components/Controls";
 import ChatPanel from "../components/ChatPanel";
+import { getToken, getCurrentUser } from "../services/authService";
 import "./Meeting-Modern.css";
 
 export default function Meeting() {
@@ -31,9 +32,11 @@ export default function Meeting() {
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
   const [isScreenSharing, setIsScreenSharing] = useState(false); // ✅ Screen share state
-  const [userName] = useState(
-    () => sessionStorage.getItem("userName") || "Guest"
-  );
+  const [userName] = useState(() => {
+    // Get user name from auth context first, fallback to sessionStorage
+    const authUser = getCurrentUser();
+    return authUser?.name || sessionStorage.getItem("userName") || "Guest";
+  });
   const [chatMessages, setChatMessages] = useState([]);
   const [remoteScreenStreams, setRemoteScreenStreams] = useState([]); // ✅ Remote screen shares
   const [participantCount, setParticipantCount] = useState(1); // ✅ Track participants
@@ -114,8 +117,24 @@ export default function Meeting() {
   useEffect(() => {
     let mounted = true;
 
-    socketRef.current = io("http://localhost:4000");
+    // Get JWT token for authenticated socket connection
+    const token = getToken();
+    
+    socketRef.current = io("http://localhost:4000", {
+      auth: {
+        token: token, // Send JWT token for authentication
+      },
+    });
     const socket = socketRef.current;
+
+    // Handle socket authentication errors
+    socket.on("connect_error", (err) => {
+      console.error("❌ Socket connection error:", err.message);
+      if (err.message.includes("Authentication") || err.message.includes("token")) {
+        // Redirect to login if authentication fails
+        navigate("/login");
+      }
+    });
 
     async function start() {
       const stream = await navigator.mediaDevices.getUserMedia({

@@ -1,26 +1,45 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function Home() {
   const [roomId, setRoomId] = useState("");
-  const [userName, setUserName] = useState("");
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  // Use authenticated user's name
+  const userName = user?.name || "Guest";
 
   function joinMeeting() {
-    if (!roomId.trim() || !userName.trim()) return;
+    if (!roomId.trim()) return;
     sessionStorage.setItem("userName", userName);
     navigate(`/meet/${roomId}`);
   }
 
   function createMeeting() {
-    if (!userName.trim()) return;
     const newRoomId = Math.random().toString(36).substring(2, 9).toUpperCase();
     sessionStorage.setItem("userName", userName);
     navigate(`/meet/${newRoomId}`);
   }
 
+  function handleLogout() {
+    logout();
+    navigate("/login");
+  }
+
   return (
     <div style={styles.page}>
+      {/* User info bar */}
+      <div style={styles.userBar}>
+        <div style={styles.userInfo}>
+          <span style={styles.welcomeText}>Welcome, {userName}</span>
+          <span style={styles.roleTag}>{user?.role}</span>
+        </div>
+        <button onClick={handleLogout} style={styles.logoutBtn}>
+          Logout
+        </button>
+      </div>
+
       <div style={styles.content}>
         <div style={styles.header}>
           <h1 style={styles.title}>🎥 Video Meet</h1>
@@ -31,18 +50,14 @@ export default function Home() {
           <div style={styles.card}>
             <div style={styles.cardIcon}>🚀</div>
             <h2 style={styles.cardTitle}>Create a new meeting</h2>
-            <input
-              placeholder="Enter your name"
-              value={userName}
-              onChange={(e) => setUserName(e.target.value)}
-              style={styles.input}
-            />
+            <div style={styles.userDisplay}>
+              Joining as: <strong>{userName}</strong>
+            </div>
             <button
               style={styles.primaryBtn}
               onClick={createMeeting}
-              disabled={!userName.trim()}
             >
-              Create
+              Create Meeting
             </button>
           </div>
 
@@ -51,12 +66,9 @@ export default function Home() {
           <div style={styles.card}>
             <div style={styles.cardIcon}>📞</div>
             <h2 style={styles.cardTitle}>Join a meeting</h2>
-            <input
-              placeholder="Your name"
-              value={userName}
-              onChange={(e) => setUserName(e.target.value)}
-              style={styles.input}
-            />
+            <div style={styles.userDisplay}>
+              Joining as: <strong>{userName}</strong>
+            </div>
             <input
               placeholder="Enter meeting code"
               value={roomId}
@@ -68,9 +80,9 @@ export default function Home() {
             <button
               style={styles.primaryBtn}
               onClick={joinMeeting}
-              disabled={!roomId.trim() || !userName.trim()}
+              disabled={!roomId.trim()}
             >
-              Join
+              Join Meeting
             </button>
           </div>
         </div>
@@ -91,10 +103,51 @@ const styles = {
     minHeight: "100vh",
     background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
     display: "flex",
+    flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
     padding: "20px",
     fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+  },
+  userBar: {
+    position: "absolute",
+    top: "20px",
+    right: "20px",
+    display: "flex",
+    alignItems: "center",
+    gap: "16px",
+    background: "rgba(255, 255, 255, 0.15)",
+    padding: "10px 20px",
+    borderRadius: "30px",
+    backdropFilter: "blur(10px)",
+  },
+  userInfo: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    color: "#fff",
+  },
+  welcomeText: {
+    fontSize: "14px",
+    fontWeight: "500",
+  },
+  roleTag: {
+    fontSize: "12px",
+    padding: "4px 10px",
+    background: "rgba(255, 255, 255, 0.2)",
+    borderRadius: "12px",
+    textTransform: "capitalize",
+  },
+  logoutBtn: {
+    padding: "8px 16px",
+    background: "rgba(255, 255, 255, 0.2)",
+    color: "#fff",
+    border: "none",
+    borderRadius: "20px",
+    fontSize: "13px",
+    fontWeight: "600",
+    cursor: "pointer",
+    transition: "background 0.2s",
   },
   content: {
     width: "100%",
@@ -138,6 +191,14 @@ const styles = {
     fontSize: "18px",
     fontWeight: 600,
     color: "#333",
+  },
+  userDisplay: {
+    padding: "12px",
+    marginBottom: "16px",
+    background: "#f5f5f5",
+    borderRadius: "8px",
+    fontSize: "14px",
+    color: "#666",
   },
   divider: {
     color: "#fff",

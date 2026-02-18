@@ -1,25 +1,50 @@
+// Load environment variables first
+require('dotenv').config();
+
 const { createWebRtcTransport } = require("./mediasoup/transport");
 
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
+const cors = require("cors");
 
 const { createWorker } = require("./mediasoup/worker");
 const { createRouter } = require("./mediasoup/router");
 const { createRoom, getRoom, removePeer } = require("./mediasoup/rooms");
 
+// Auth imports
+const connectDB = require("./config/db");
+const routes = require("./routes");
+const { socketAuthMiddleware } = require("./middleware/socketAuth");
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// API Routes
+app.use("/api", routes);
+
 let worker;
 
 (async () => {
+  // Connect to MongoDB
+  await connectDB();
+  
   worker = await createWorker();
 })();
 
+// Socket.IO Authentication Middleware
+io.use(socketAuthMiddleware);
+
 io.on("connection", (socket) => {
-  console.log("Client connected:", socket.id);
+  // Now socket.user contains authenticated user info
+  console.log(`Client connected: ${socket.id} (${socket.user?.name || 'Unknown'})`);
+
 
   socket.on("create-transport", async ({ direction }, callback) => {
     const room = getRoom(socket.roomId);
@@ -215,16 +240,21 @@ io.on("connection", (socket) => {
   socket.on("join-room", async ({ roomId, userName }) => {
     const room = await createRoom(roomId, worker, createRouter);
 
+    // Use authenticated user info if available, fallback to provided userName
+    const userInfo = socket.user || { name: userName || "Guest" };
+
     room.peers.set(socket.id, {
       socket,
-      userName: userName || "Guest",
+      userName: userInfo.name,
+      userId: userInfo.userId || null,
+      userRole: userInfo.role || 'guest',
       transports: [],
       producers: [],
       consumers: [],
     });
 
     socket.roomId = roomId;
-    socket.userName = userName || "Guest";
+    socket.userName = userInfo.name;
 
     // ✅ Join socket.io room so broadcasts work
     socket.join(roomId);
@@ -232,7 +262,7 @@ io.on("connection", (socket) => {
       `✅ Socket ${socket.id.substring(
         0,
         8
-      )} (${userName}) joined room ${roomId}`
+      )} (${userInfo.name} - ${userInfo.role || 'guest'}) joined room ${roomId}`
     );
 
     // ✅ Notify all peers about new participant
