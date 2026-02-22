@@ -4,6 +4,7 @@ import { io } from "socket.io-client";
 import * as mediasoupClient from "mediasoup-client";
 import Controls from "../components/Controls";
 import ChatPanel from "../components/ChatPanel";
+import Whiteboard from "../components/Whiteboard";
 import { getToken, getCurrentUser } from "../services/authService";
 import "./Meeting-Modern.css";
 
@@ -44,6 +45,13 @@ export default function Meeting() {
   const [messages, setMessages] = useState([]); // ✅ Chat messages
   const [chatInput, setChatInput] = useState(""); // ✅ Chat input
   const [fullscreenMode, setFullscreenMode] = useState("meeting"); // ✅ "meeting" or "screen"
+  const [showWhiteboard, setShowWhiteboard] = useState(false); // ✅ Whiteboard visibility
+  const [wbCreatorUserId, setWbCreatorUserId] = useState(null); // ✅ Whiteboard creator
+  const [wbAccessList, setWbAccessList] = useState([]); // ✅ Whiteboard access list
+  const [currentOdId, setCurrentOdId] = useState(null); // ✅ Our unique draw ID
+  const whiteboardDataRef = useRef(null); // ✅ Persist whiteboard canvas across open/close
+  const whiteboardHistoryRef = useRef(null); // ✅ Persist undo history across open/close
+  const whiteboardRedoRef = useRef(null); // ✅ Persist redo stack across open/close
 
   /* ============================
      AUTO-RESET FULLSCREEN WHEN SCREEN SHARE STOPS
@@ -290,6 +298,22 @@ export default function Meeting() {
         ]);
       }
     );
+
+    /* ✅ Whiteboard init (creator info + access list) */
+    socket.on("wb:init", ({ creatorUserId, accessList }) => {
+      setWbCreatorUserId(creatorUserId);
+      setWbAccessList(accessList || []);
+      console.log(`🎨 Whiteboard init: creator=${creatorUserId}`);
+    });
+
+    /* ✅ Whiteboard access list updates */
+    socket.on("wb:access-update", ({ accessList }) => {
+      setWbAccessList(accessList || []);
+    });
+
+    /* ✅ Set our draw ID */
+    const authUser = getCurrentUser();
+    setCurrentOdId(authUser?.id || authUser?._id || socket.id);
 
     /* ---------- Load mediasoup device ---------- */
     socket.on("router-rtp-capabilities", async (rtpCapabilities) => {
@@ -845,6 +869,25 @@ export default function Meeting() {
         </div>
       </div>
 
+      {/* Whiteboard panel */}
+      {showWhiteboard && (
+        <div className="whiteboard-panel">
+          <Whiteboard
+            socket={socketRef.current}
+            roomId={roomId}
+            isCreator={currentOdId === wbCreatorUserId}
+            currentUserId={currentOdId}
+            userName={userName}
+            onClose={() => setShowWhiteboard(false)}
+            savedState={whiteboardDataRef.current}
+            onStateChange={(dataUrl) => { whiteboardDataRef.current = dataUrl; }}
+            savedHistory={whiteboardHistoryRef.current}
+            savedRedoStack={whiteboardRedoRef.current}
+            onHistoryChange={(history, redoStack) => { whiteboardHistoryRef.current = history; whiteboardRedoRef.current = redoStack; }}
+          />
+        </div>
+      )}
+
       {/* Controls */}
       <Controls
         isMuted={isMuted}
@@ -858,6 +901,8 @@ export default function Meeting() {
           setShowChat(!showChat);
         }}
         showChat={showChat}
+        toggleWhiteboard={() => setShowWhiteboard(!showWhiteboard)}
+        showWhiteboard={showWhiteboard}
         leaveMeeting={leaveMeeting}
       />
     </div>

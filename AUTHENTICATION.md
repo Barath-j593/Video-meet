@@ -45,7 +45,7 @@ Use these credentials to test the application:
 
 ```bash
 # Terminal 1 - Start MongoDB (if not running as service)
-mongod
+mongosh
 
 # Terminal 2 - Start the Server
 cd server

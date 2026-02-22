@@ -7,6 +7,8 @@ export default function Controls({
   toggleScreenShare,
   toggleChat,
   showChat,
+  toggleWhiteboard,
+  showWhiteboard,
   leaveMeeting,
 }) {
   return (
@@ -47,6 +49,15 @@ export default function Controls({
       >
         💬
         <span>{showChat ? "Close Chat" : "Chat"}</span>
+      </button>
+
+      <button
+        onClick={toggleWhiteboard}
+        className={`control-btn ${showWhiteboard ? "active-orange" : "default"}`}
+        title={showWhiteboard ? "Close whiteboard" : "Open whiteboard"}
+      >
+        🎨
+        <span>{showWhiteboard ? "Close Board" : "Whiteboard"}</span>
       </button>
 
       <button

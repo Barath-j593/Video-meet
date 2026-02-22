@@ -1,0 +1,557 @@
+/* ============================
+   WHITEBOARD - COMPLETE STYLES
+   Matches Meeting-Modern.css theme (Cyan/Magenta/Green Neon)
+   ============================ */
+
+/* ---------- Container ---------- */
+.whiteboard-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #0a0e27 0%, #0d1229 100%);
+  border-radius: 16px;
+  border: 2px solid rgba(0, 217, 255, 0.15);
+  box-shadow: 0 0 40px rgba(0, 217, 255, 0.15), inset 0 0 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  position: relative;
+}
+
+/* ---------- Toolbar ---------- */
+.wb-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: linear-gradient(90deg, rgba(10, 14, 39, 0.98), rgba(26, 31, 58, 0.95));
+  border-bottom: 2px solid rgba(0, 217, 255, 0.12);
+  gap: 8px;
+  flex-shrink: 0;
+  min-height: 52px;
+  flex-wrap: wrap;
+  z-index: 10;
+  backdrop-filter: blur(20px);
+}
+
+.wb-toolbar-left,
+.wb-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.wb-separator {
+  width: 1px;
+  height: 28px;
+  background: linear-gradient(180deg, transparent, rgba(0, 217, 255, 0.3), transparent);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+/* ---------- Tool Buttons ---------- */
+.wb-tool-group {
+  display: flex;
+  gap: 3px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  padding: 3px;
+  border: 1px solid rgba(0, 217, 255, 0.08);
+}
+
+.wb-tool-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+}
+
+.wb-tool-btn:hover:not(:disabled) {
+  background: rgba(0, 217, 255, 0.1);
+  color: #00d9ff;
+  border-color: rgba(0, 217, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.wb-tool-btn.active {
+  background: linear-gradient(135deg, rgba(0, 217, 255, 0.2), rgba(0, 245, 255, 0.15));
+  color: #00f5ff;
+  border-color: rgba(0, 217, 255, 0.4);
+  box-shadow: 0 0 12px rgba(0, 217, 255, 0.3), inset 0 0 8px rgba(0, 217, 255, 0.1);
+}
+
+.wb-tool-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ---------- Color Buttons ---------- */
+.wb-color-group {
+  display: flex;
+  gap: 3px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  padding: 3px 5px;
+  border: 1px solid rgba(0, 217, 255, 0.08);
+}
+
+.wb-color-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.wb-color-btn:hover:not(:disabled) {
+  transform: scale(1.25);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 10px currentColor;
+}
+
+.wb-color-btn.active {
+  border-color: #fff;
+  transform: scale(1.2);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.5), 0 0 20px currentColor;
+}
+
+.wb-color-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ---------- Size Buttons ---------- */
+.wb-size-group {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  padding: 3px 5px;
+  border: 1px solid rgba(0, 217, 255, 0.08);
+}
+
+.wb-size-btn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.wb-size-btn:hover:not(:disabled) {
+  background: rgba(0, 217, 255, 0.1);
+  border-color: rgba(0, 217, 255, 0.2);
+}
+
+.wb-size-btn.active {
+  background: rgba(0, 217, 255, 0.15);
+  border-color: rgba(0, 217, 255, 0.4);
+  box-shadow: 0 0 8px rgba(0, 217, 255, 0.2);
+}
+
+.wb-size-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.wb-size-dot {
+  border-radius: 50%;
+  display: block;
+  transition: all 0.2s;
+}
+
+/* ---------- Action Buttons ---------- */
+.wb-action-btn {
+  padding: 6px 12px;
+  border: 1px solid rgba(0, 217, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(0, 217, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  white-space: nowrap;
+  font-family: inherit;
+  letter-spacing: 0.3px;
+}
+
+.wb-action-btn:hover:not(:disabled) {
+  background: rgba(0, 217, 255, 0.15);
+  border-color: rgba(0, 217, 255, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 0 12px rgba(0, 217, 255, 0.3);
+}
+
+.wb-action-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.wb-action-btn.danger {
+  border-color: rgba(255, 0, 110, 0.3);
+  background: rgba(255, 0, 110, 0.08);
+  color: #ff4488;
+}
+
+.wb-action-btn.danger:hover:not(:disabled) {
+  background: rgba(255, 0, 110, 0.2);
+  border-color: rgba(255, 0, 110, 0.5);
+  box-shadow: 0 0 12px rgba(255, 0, 110, 0.3);
+}
+
+.wb-action-btn.access {
+  border-color: rgba(0, 255, 136, 0.3);
+  background: rgba(0, 255, 136, 0.08);
+  color: #00ff88;
+}
+
+.wb-action-btn.access:hover {
+  background: rgba(0, 255, 136, 0.15);
+  border-color: rgba(0, 255, 136, 0.5);
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.3);
+}
+
+.wb-action-btn.close {
+  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 16px;
+  padding: 4px 10px;
+}
+
+.wb-action-btn.close:hover {
+  background: rgba(255, 0, 110, 0.15);
+  border-color: rgba(255, 0, 110, 0.4);
+  color: #ff006e;
+}
+
+/* ---------- No Access Banner ---------- */
+.wb-no-access-banner {
+  background: linear-gradient(90deg, rgba(255, 0, 110, 0.12), rgba(255, 106, 0, 0.08));
+  border-bottom: 1px solid rgba(255, 0, 110, 0.2);
+  color: rgba(255, 200, 200, 0.9);
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+  animation: bannerGlow 3s ease-in-out infinite;
+}
+
+@keyframes bannerGlow {
+  0%, 100% { background: linear-gradient(90deg, rgba(255, 0, 110, 0.12), rgba(255, 106, 0, 0.08)); }
+  50% { background: linear-gradient(90deg, rgba(255, 0, 110, 0.18), rgba(255, 106, 0, 0.12)); }
+}
+
+/* ---------- Canvas Area ---------- */
+.wb-canvas-area {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(0, 217, 255, 0.02) 0%, transparent 70%),
+    linear-gradient(rgba(0, 217, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px);
+  background-size: 100% 100%, 30px 30px, 30px 30px;
+}
+
+.wb-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+.wb-overlay-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ---------- Participants Panel ---------- */
+.wb-participants-panel {
+  position: absolute;
+  top: 56px;
+  right: 12px;
+  width: 280px;
+  max-height: 350px;
+  background: linear-gradient(135deg, rgba(10, 14, 39, 0.98), rgba(21, 26, 50, 0.98));
+  border: 2px solid rgba(0, 255, 136, 0.2);
+  border-radius: 14px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 255, 136, 0.15);
+  z-index: 100;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  animation: panelSlideIn 0.25s ease;
+}
+
+@keyframes panelSlideIn {
+  from { opacity: 0; transform: translateY(-10px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.wb-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(0, 255, 136, 0.15);
+  background: rgba(0, 255, 136, 0.05);
+}
+
+.wb-panel-header h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #00ff88;
+  letter-spacing: 0.5px;
+}
+
+.wb-panel-close {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.wb-panel-close:hover {
+  color: #ff006e;
+  background: rgba(255, 0, 110, 0.1);
+}
+
+.wb-panel-body {
+  padding: 8px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.wb-panel-body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.wb-panel-body::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 136, 0.3);
+  border-radius: 2px;
+}
+
+.wb-no-participants {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 13px;
+  padding: 16px;
+  margin: 0;
+}
+
+.wb-participant-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 10px;
+  transition: background 0.2s;
+  margin-bottom: 2px;
+}
+
+.wb-participant-row:hover {
+  background: rgba(0, 255, 136, 0.05);
+}
+
+.wb-participant-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.wb-participant-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00d9ff, #00ff88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #000;
+  flex-shrink: 0;
+}
+
+.wb-participant-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wb-creator-badge {
+  font-size: 10px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #ffd600, #ff6d00);
+  color: #000;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
+
+.wb-access-toggle {
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.wb-access-toggle:hover {
+  border-color: rgba(0, 255, 136, 0.4);
+  color: #00ff88;
+  background: rgba(0, 255, 136, 0.1);
+}
+
+.wb-access-toggle.granted {
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.15), rgba(0, 217, 255, 0.1));
+  border-color: rgba(0, 255, 136, 0.4);
+  color: #00ff88;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+}
+
+/* ---------- Text Input Overlay ---------- */
+.wb-text-input-overlay {
+  position: absolute;
+  z-index: 50;
+  display: flex;
+  gap: 4px;
+  animation: fadeInUp 0.2s ease;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.wb-text-field {
+  padding: 8px 12px;
+  background: rgba(10, 14, 39, 0.95);
+  border: 2px solid rgba(0, 217, 255, 0.4);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  min-width: 180px;
+  font-family: inherit;
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
+}
+
+.wb-text-field:focus {
+  border-color: rgba(0, 217, 255, 0.7);
+  box-shadow: 0 0 25px rgba(0, 217, 255, 0.35);
+}
+
+.wb-text-field::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.wb-text-ok {
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #00d9ff, #00f5ff);
+  border: none;
+  border-radius: 8px;
+  color: #000;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 0 12px rgba(0, 217, 255, 0.4);
+}
+
+.wb-text-ok:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.6);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .wb-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 6px 8px;
+  }
+
+  .wb-toolbar-left,
+  .wb-toolbar-right {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .wb-color-group {
+    flex-wrap: wrap;
+  }
+
+  .wb-participants-panel {
+    width: calc(100% - 24px);
+    right: 12px;
+    left: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .wb-tool-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .wb-color-btn {
+    width: 18px;
+    height: 18px;
+  }
+
+  .wb-size-btn {
+    width: 26px;
+    height: 26px;
+  }
+
+  .wb-action-btn {
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+}

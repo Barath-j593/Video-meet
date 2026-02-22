@@ -31,6 +31,9 @@ app.use("/api", routes);
 
 let worker;
 
+// Whiteboard state per room: { imageDataUrl, accessList[], creatorSocketId, creatorUserId }
+const whiteboardState = new Map();
+
 (async () => {
   // Connect to MongoDB
   await connectDB();
@@ -243,6 +246,9 @@ io.on("connection", (socket) => {
     // Use authenticated user info if available, fallback to provided userName
     const userInfo = socket.user || { name: userName || "Guest" };
 
+    // Track if this is the first person (room creator)
+    const isFirstPeer = room.peers.size === 0;
+
     room.peers.set(socket.id, {
       socket,
       userName: userInfo.name,
@@ -255,6 +261,24 @@ io.on("connection", (socket) => {
 
     socket.roomId = roomId;
     socket.userName = userInfo.name;
+    socket.odId = userInfo.userId || socket.id; // unique draw ID
+
+    // Initialize whiteboard state for this room if not exists
+    if (!whiteboardState.has(roomId)) {
+      whiteboardState.set(roomId, {
+        imageDataUrl: null,
+        accessList: [],
+        creatorSocketId: socket.id,
+        creatorUserId: socket.odId,
+      });
+    }
+
+    // If first peer, they become the creator
+    if (isFirstPeer) {
+      const wb = whiteboardState.get(roomId);
+      wb.creatorSocketId = socket.id;
+      wb.creatorUserId = socket.odId;
+    }
 
     // ✅ Join socket.io room so broadcasts work
     socket.join(roomId);
@@ -270,6 +294,13 @@ io.on("connection", (socket) => {
       participantCount: room.peers.size,
     });
 
+    // Send whiteboard creator info & access list to the joining user
+    const wb = whiteboardState.get(roomId);
+    socket.emit("wb:init", {
+      creatorUserId: wb.creatorUserId,
+      accessList: wb.accessList,
+    });
+
     socket.emit("router-rtp-capabilities", room.router.rtpCapabilities);
   });
 
@@ -277,8 +308,8 @@ io.on("connection", (socket) => {
   socket.on("chat-message", ({ message, senderName, timestamp }) => {
     const roomId = socket.roomId;
     if (roomId) {
-      // Broadcast message to all peers in the room
-      io.to(roomId).emit("chat-message", {
+      // Broadcast message to all OTHER peers in the room (sender already added it locally)
+      socket.to(roomId).emit("chat-message", {
         senderId: socket.id,
         senderName: senderName || socket.userName || "Guest",
         message,
@@ -291,6 +322,112 @@ io.on("connection", (socket) => {
         )}): ${message.substring(0, 50)}`
       );
     }
+  });
+
+  /* ============================
+     WHITEBOARD SOCKET EVENTS
+     ============================ */
+
+  // 🎨 Late joiner requests current whiteboard state
+  socket.on("wb:request-state", ({ roomId }) => {
+    const wb = whiteboardState.get(roomId);
+    if (!wb) return;
+
+    // If server has a cached state, send it directly (fastest path)
+    if (wb.imageDataUrl) {
+      socket.emit("wb:full-state", { imageDataUrl: wb.imageDataUrl });
+      return;
+    }
+
+    // Otherwise ask a peer who has the whiteboard open
+    const room = getRoom(roomId);
+    if (!room) return;
+
+    const creatorPeer = wb.creatorSocketId ? room.peers.get(wb.creatorSocketId) : null;
+    if (creatorPeer && creatorPeer.socket) {
+      creatorPeer.socket.emit("wb:request-state", { requesterId: socket.id });
+    } else {
+      // If creator left, find any other peer to send state
+      for (const [peerId, peer] of room.peers.entries()) {
+        if (peerId !== socket.id) {
+          peer.socket.emit("wb:request-state", { requesterId: socket.id });
+          break;
+        }
+      }
+    }
+  });
+
+  // 🎨 Creator/peer sends state back to late joiner
+  socket.on("wb:send-state", ({ roomId, targetSocketId, imageDataUrl }) => {
+    // Store latest state on server too
+    const wb = whiteboardState.get(roomId);
+    if (wb) {
+      wb.imageDataUrl = imageDataUrl;
+    }
+    // Send directly to the requesting socket
+    io.to(targetSocketId).emit("wb:full-state", { imageDataUrl });
+  });
+
+  // 🎨 Draw action (stroke, shape, text, clear)
+  socket.on("wb:draw", ({ roomId, action, data }) => {
+    // Broadcast to all others in room
+    socket.to(roomId).emit("wb:draw", { action, data });
+
+    // If clear, reset stored state
+    if (action === "clear") {
+      const wb = whiteboardState.get(roomId);
+      if (wb) wb.imageDataUrl = null;
+    }
+  });
+
+  // 🎨 Snapshot broadcast (undo/redo) 
+  socket.on("wb:snapshot", ({ roomId, imageDataUrl }) => {
+    // Store latest state
+    const wb = whiteboardState.get(roomId);
+    if (wb) wb.imageDataUrl = imageDataUrl;
+    // Broadcast to others
+    socket.to(roomId).emit("wb:snapshot", { imageDataUrl });
+  });
+
+  // 🎨 Toggle drawing access for a user
+  socket.on("wb:toggle-access", ({ roomId, targetUserId }) => {
+    const wb = whiteboardState.get(roomId);
+    if (!wb) return;
+
+    // Only creator can toggle access
+    if (socket.odId !== wb.creatorUserId) return;
+
+    const idx = wb.accessList.indexOf(targetUserId);
+    if (idx === -1) {
+      wb.accessList.push(targetUserId);
+      console.log(`🎨 Whiteboard: Granted draw access to ${targetUserId} in room ${roomId}`);
+    } else {
+      wb.accessList.splice(idx, 1);
+      console.log(`🎨 Whiteboard: Revoked draw access from ${targetUserId} in room ${roomId}`);
+    }
+
+    // Broadcast updated access list to everyone in room
+    io.to(roomId).emit("wb:access-update", { accessList: wb.accessList });
+  });
+
+  // 🎨 Get participant list (for access control panel)
+  socket.on("wb:get-participants", ({ roomId }) => {
+    const room = getRoom(roomId);
+    if (!room) return;
+    const wb = whiteboardState.get(roomId);
+
+    const participants = [];
+    for (const [peerId, peer] of room.peers.entries()) {
+      if (peerId === socket.id) continue; // Skip self
+      participants.push({
+        odId: peer.userId || peerId,
+        socketId: peerId,
+        userName: peer.userName,
+        isCreator: wb && (peer.userId || peerId) === wb.creatorUserId,
+      });
+    }
+
+    socket.emit("wb:participants", { participants });
   });
 
   // 📺 Screen share stopped handler
@@ -317,6 +454,28 @@ io.on("connection", (socket) => {
       console.log(`📢 Peer ${socket.id.substring(0, 8)} left room ${roomId}`);
 
       removePeer(roomId, socket.id);
+
+      // ✅ Update whiteboard creator if creator left
+      const wb = whiteboardState.get(roomId);
+      if (wb && wb.creatorSocketId === socket.id) {
+        // Transfer creator to next peer
+        if (room && room.peers.size > 0) {
+          const [nextPeerId, nextPeer] = room.peers.entries().next().value;
+          wb.creatorSocketId = nextPeerId;
+          wb.creatorUserId = nextPeer.userId || nextPeerId;
+          console.log(`🎨 Whiteboard creator transferred to ${nextPeer.userName}`);
+          // Notify everyone of new creator
+          io.to(roomId).emit("wb:init", {
+            creatorUserId: wb.creatorUserId,
+            accessList: wb.accessList,
+          });
+        }
+      }
+
+      // Clean up whiteboard state if room is empty
+      if (!room || room.peers.size === 0) {
+        whiteboardState.delete(roomId);
+      }
 
       // ✅ Update participant count for remaining peers
       if (room && room.peers.size > 0) {
