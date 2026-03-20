@@ -2,22 +2,37 @@ import { useState, useRef } from "react";
 
 // ─── CONFIG — paste your free Gemini key here ────────────────────────────────
 // Get it free (no credit card) at: aistudio.google.com → Get API Key
-const GEMINI_KEY = "AIzaSyAJ3KhjCOHCd4DYSg8LF9mGiEAesgVFiFY";
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`;
-
+const GEMINI_KEY = "AIzaSyA12KjYqgtT8jzvfSlFFaDI9d4TiSl3Emg";
+// Remove the space and add the model endpoint
+// Use v1beta for Gemini 1.5 Flash to ensure multimodal (PDF) support
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`;
 // ─── API ─────────────────────────────────────────────────────────────────────
-
 async function callGemini(prompt) {
-  const resp = await fetch(GEMINI_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { maxOutputTokens: 2048, temperature: 0.2 },
-    }),
-  });
-  const data = await resp.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+  try {
+    const resp = await fetch(GEMINI_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { 
+          maxOutputTokens: 2048, 
+          temperature: 0.2 
+        },
+      }),
+    });
+
+    if (!resp.ok) {
+      const errorData = await resp.json();
+      console.error("Gemini API Error:", errorData);
+      return `Error: ${resp.status} - ${errorData.error?.message || 'Unknown error'}`;
+    }
+
+    const data = await resp.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || "No response text found.";
+  } catch (err) {
+    console.error("Fetch failed:", err);
+    return "Failed to connect to the Gemini API.";
+  }
 }
 
 async function fileToText(file) {
