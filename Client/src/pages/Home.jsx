@@ -85,7 +85,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* ── Resume Filter card — visible to all users ──────────────────── */}
+        {/* ── Resume Filter — two direct buttons ────────────────────────── */}
         <div style={styles.resumeSection}>
           <div style={styles.resumeCard}>
             <div style={styles.resumeLeft}>
@@ -93,16 +93,24 @@ export default function Home() {
               <div>
                 <h3 style={styles.resumeTitle}>Resume Intelligence</h3>
                 <p style={styles.resumeDesc}>
-                  AI-powered resume screening — apply for positions or review and rank candidates.
+                  AI-powered resume screening and candidate ranking.
                 </p>
               </div>
             </div>
-            <button
-              style={styles.resumeBtn}
-              onClick={() => navigate("/resumefilter")}
-            >
-              Open →
-            </button>
+            <div style={styles.resumeBtns}>
+              <button
+                style={styles.resumeBtnOutline}
+                onClick={() => navigate("/resumefilter/jobseeker")}
+              >
+                Apply as Job Seeker
+              </button>
+              <button
+                style={styles.resumeBtn}
+                onClick={() => navigate("/resumefilter/interviewer")}
+              >
+                Interviewer Dashboard
+              </button>
+            </div>
           </div>
         </div>
         {/* ────────────────────────────────────────────────────────────────── */}
@@ -283,5 +291,22 @@ const styles = {
     background: "rgba(255, 255, 255, 0.1)",
     borderRadius: "8px",
     backdropFilter: "blur(10px)",
+  },
+  resumeBtns: {
+    display: "flex",
+    gap: "10px",
+    flexWrap: "wrap",
+    justifyContent: "flex-end",
+  },
+  resumeBtnOutline: {
+    padding: "11px 22px",
+    background: "transparent",
+    color: "#fff",
+    border: "2px solid rgba(255,255,255,0.6)",
+    borderRadius: "24px",
+    fontSize: "14px",
+    fontWeight: 600,
+    cursor: "pointer",
+    whiteSpace: "nowrap",
   },
 };

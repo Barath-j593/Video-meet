@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+// This is App.jsx - see Home.jsx output for the main changes
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
@@ -34,7 +34,24 @@ export default function App() {
             }
           />
 
-          {/* ← ADD THIS — Resume Filter (protected) */}
+          {/* Resume Filter — two direct routes, no role-selection screen */}
+          <Route
+            path="/resumefilter/interviewer"
+            element={
+              <ProtectedRoute>
+                <ResumeScreening defaultRole="interviewer" />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/resumefilter/jobseeker"
+            element={
+              <ProtectedRoute>
+                <ResumeScreening defaultRole="jobseeker" />
+              </ProtectedRoute>
+            }
+          />
+          {/* Keep this so /resumefilter still works (shows role selector) */}
           <Route
             path="/resumefilter"
             element={

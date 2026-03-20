@@ -1,20 +1,27 @@
 import { useState, useRef } from "react";
 
+// ─── CONFIG — paste your free Gemini key here ────────────────────────────────
+// Get it free (no credit card) at: aistudio.google.com → Get API Key
+const GEMINI_KEY = "AIzaSyAJ3KhjCOHCd4DYSg8LF9mGiEAesgVFiFY";
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`;
+
 // ─── API ─────────────────────────────────────────────────────────────────────
 
-async function callClaude(messages, system = "") {
-  const body = { model: "claude-sonnet-4-20250514", max_tokens: 1200, messages };
-  if (system) body.system = system;
-  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+async function callGemini(prompt) {
+  const resp = await fetch(GEMINI_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { maxOutputTokens: 2048, temperature: 0.2 },
+    }),
   });
   const data = await resp.json();
-  return data.content?.map((b) => b.text || "").join("") || "";
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 }
 
-function fileToBase64(file) {
+async function fileToText(file) {
+  // Gemini flash accepts base64 PDF inline
   return new Promise((res, rej) => {
     const r = new FileReader();
     r.onload = () => res(r.result.split(",")[1]);
@@ -24,23 +31,28 @@ function fileToBase64(file) {
 }
 
 async function extractResumeData(file) {
-  const base64 = await fileToBase64(file);
-  const text = await callClaude(
-    [{ role: "user", content: [
-      { type: "document", source: { type: "base64", media_type: "application/pdf", data: base64 } },
-      { type: "text", text: `Extract ALL resume info as JSON: name, email, phone, location, summary, total_years_experience (number), current_role, skills (array), education (array of {degree,field,institution,year}), experience (array of {title,company,start_year,end_year,highlights}), certifications (array), notable_achievements (array with numbers). Reply ONLY valid JSON.` }
-    ]}],
-    "Resume parser. Return only valid JSON."
-  );
+  const base64 = await fileToText(file);
+  const resp = await fetch(GEMINI_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ parts: [
+        { inline_data: { mime_type: "application/pdf", data: base64 } },
+        { text: "Extract ALL resume info as JSON: name, email, phone, location, summary, total_years_experience (number), current_role, skills (array), education (array of {degree,field,institution,year}), experience (array of {title,company,start_year,end_year,highlights}), certifications (array), notable_achievements (array with numbers). Reply ONLY valid JSON, no markdown." }
+      ]}],
+      generationConfig: { maxOutputTokens: 2048, temperature: 0 },
+    }),
+  });
+  const data = await resp.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
   try { return JSON.parse(text.replace(/```json|```/g, "").trim()); }
   catch { return { name: file.name, parse_error: true }; }
 }
 
 async function rankResumes(candidates, jobSpec) {
   const summaries = candidates.map((c, i) => `[${i}] ${c.name}: ${JSON.stringify(c.parsedData)}`).join("\n\n");
-  const text = await callClaude(
-    [{ role: "user", content: `Job:\n${jobSpec}\n\nCandidates:\n${summaries}\n\nReturn ONLY JSON array. Each item: {index, score (0-100), match_level ("Strong"|"Good"|"Fair"|"Weak"), top_strengths (2-3 strings), gaps (1-2 strings), recommendation (1 sentence)}` }],
-    "Senior recruiter. Return only JSON array."
+  const text = await callGemini(
+    `Job:\n${jobSpec}\n\nCandidates:\n${summaries}\n\nReturn ONLY a JSON array. Each item: {index, score (0-100), match_level ("Strong"|"Good"|"Fair"|"Weak"), top_strengths (2-3 strings), gaps (1-2 strings), recommendation (1 sentence)}. No markdown.`
   );
   try { return JSON.parse(text.replace(/```json|```/g, "").trim()); }
   catch { return []; }
@@ -48,9 +60,8 @@ async function rankResumes(candidates, jobSpec) {
 
 async function askQuestion(question, candidates, jobSpec) {
   const ctx = candidates.map((c, i) => `Candidate ${i+1} — ${c.name}:\n${JSON.stringify(c.parsedData, null, 2)}`).join("\n\n---\n\n");
-  return callClaude(
-    [{ role: "user", content: `${candidates.length} resumes. Job: "${jobSpec}"\n\n${ctx}\n\nQ: ${question}\n\nAnswer with EXACT stats. Use markdown tables for comparisons.` }],
-    "Precise HR analyst. Exact data only. Use markdown tables."
+  return callGemini(
+    `You have ${candidates.length} resumes. Job: "${jobSpec}"\n\n${ctx}\n\nQuestion: ${question}\n\nAnswer with EXACT stats from the data. Use markdown tables when comparing candidates.`
   );
 }
 
@@ -640,8 +651,8 @@ function InterviewerView({ onSwitch }) {
 // ─── ROOT ─────────────────────────────────────────────────────────────────────
 const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');`;
 
-export default function App() {
-  const [role, setRole] = useState(null);
+export default function App({ defaultRole = null }) {
+  const [role, setRole] = useState(defaultRole);
   const [tick, setTick] = useState(0);
   const switchRole = () => { setRole(null); setTick(t => t+1); };
 
