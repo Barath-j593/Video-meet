@@ -1,6 +1,7 @@
 // Load environment variables first
 require('dotenv').config();
 
+console.log("ENV:", process.env.MONGO_URI);
 const { createWebRtcTransport } = require("./mediasoup/transport");
 
 const express = require("express");
