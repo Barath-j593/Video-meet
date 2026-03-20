@@ -7,7 +7,6 @@ export default function Home() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
-  // Use authenticated user's name
   const userName = user?.name || "Guest";
 
   function joinMeeting() {
@@ -26,6 +25,8 @@ export default function Home() {
     logout();
     navigate("/login");
   }
+
+
 
   return (
     <div style={styles.page}>
@@ -53,10 +54,7 @@ export default function Home() {
             <div style={styles.userDisplay}>
               Joining as: <strong>{userName}</strong>
             </div>
-            <button
-              style={styles.primaryBtn}
-              onClick={createMeeting}
-            >
+            <button style={styles.primaryBtn} onClick={createMeeting}>
               Create Meeting
             </button>
           </div>
@@ -87,9 +85,31 @@ export default function Home() {
           </div>
         </div>
 
+        {/* ── Resume Filter card — visible to all users ──────────────────── */}
+        <div style={styles.resumeSection}>
+          <div style={styles.resumeCard}>
+            <div style={styles.resumeLeft}>
+              <div style={styles.resumeIcon}>🎯</div>
+              <div>
+                <h3 style={styles.resumeTitle}>Resume Intelligence</h3>
+                <p style={styles.resumeDesc}>
+                  AI-powered resume screening — apply for positions or review and rank candidates.
+                </p>
+              </div>
+            </div>
+            <button
+              style={styles.resumeBtn}
+              onClick={() => navigate("/resumefilter")}
+            >
+              Open →
+            </button>
+          </div>
+        </div>
+        {/* ────────────────────────────────────────────────────────────────── */}
+
         <div style={styles.features}>
           <div style={styles.feature}>✨ Crystal clear video</div>
-          <div style={styles.feature}>🔒 Secure & encrypted</div>
+          <div style={styles.feature}>🔒 Secure &amp; encrypted</div>
           <div style={styles.feature}>📺 Screen sharing</div>
           <div style={styles.feature}>👥 Multiple participants</div>
         </div>
@@ -127,10 +147,7 @@ const styles = {
     gap: "10px",
     color: "#fff",
   },
-  welcomeText: {
-    fontSize: "14px",
-    fontWeight: "500",
-  },
+  welcomeText: { fontSize: "14px", fontWeight: "500" },
   roleTag: {
     fontSize: "12px",
     padding: "4px 10px",
@@ -147,33 +164,17 @@ const styles = {
     fontSize: "13px",
     fontWeight: "600",
     cursor: "pointer",
-    transition: "background 0.2s",
   },
-  content: {
-    width: "100%",
-    maxWidth: "900px",
-  },
-  header: {
-    textAlign: "center",
-    color: "#fff",
-    marginBottom: "60px",
-  },
-  title: {
-    fontSize: "48px",
-    margin: "0 0 10px 0",
-    fontWeight: 700,
-  },
-  subtitle: {
-    fontSize: "18px",
-    margin: "0",
-    opacity: 0.9,
-  },
+  content: { width: "100%", maxWidth: "900px" },
+  header: { textAlign: "center", color: "#fff", marginBottom: "60px" },
+  title: { fontSize: "48px", margin: "0 0 10px 0", fontWeight: 700 },
+  subtitle: { fontSize: "18px", margin: "0", opacity: 0.9 },
   cardContainer: {
     display: "grid",
     gridTemplateColumns: "1fr auto 1fr",
     gap: "40px",
     alignItems: "center",
-    marginBottom: "60px",
+    marginBottom: "40px",
   },
   card: {
     background: "#fff",
@@ -182,16 +183,8 @@ const styles = {
     boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
     textAlign: "center",
   },
-  cardIcon: {
-    fontSize: "48px",
-    marginBottom: "16px",
-  },
-  cardTitle: {
-    margin: "0 0 20px 0",
-    fontSize: "18px",
-    fontWeight: 600,
-    color: "#333",
-  },
+  cardIcon: { fontSize: "48px", marginBottom: "16px" },
+  cardTitle: { margin: "0 0 20px 0", fontSize: "18px", fontWeight: 600, color: "#333" },
   userDisplay: {
     padding: "12px",
     marginBottom: "16px",
@@ -200,12 +193,7 @@ const styles = {
     fontSize: "14px",
     color: "#666",
   },
-  divider: {
-    color: "#fff",
-    fontSize: "16px",
-    fontWeight: 500,
-    opacity: 0.7,
-  },
+  divider: { color: "#fff", fontSize: "16px", fontWeight: 500, opacity: 0.7 },
   input: {
     width: "100%",
     padding: "12px 16px",
@@ -217,7 +205,6 @@ const styles = {
     fontWeight: 600,
     textTransform: "uppercase",
     letterSpacing: "1px",
-    transition: "border-color 0.2s ease",
   },
   primaryBtn: {
     width: "100%",
@@ -229,8 +216,60 @@ const styles = {
     fontSize: "16px",
     fontWeight: 600,
     cursor: "pointer",
-    transition: "transform 0.2s ease",
   },
+
+  // ── Resume Filter styles ──────────────────────────────────────────────────
+  resumeSection: {
+    marginBottom: "40px",
+  },
+  resumeCard: {
+    background: "rgba(255, 255, 255, 0.12)",
+    backdropFilter: "blur(10px)",
+    border: "1px solid rgba(255,255,255,0.25)",
+    borderRadius: "12px",
+    padding: "24px 32px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "24px",
+    flexWrap: "wrap",
+  },
+  resumeLeft: {
+    display: "flex",
+    alignItems: "center",
+    gap: "18px",
+  },
+  resumeIcon: {
+    fontSize: "36px",
+    flexShrink: 0,
+  },
+  resumeTitle: {
+    color: "#fff",
+    fontSize: "18px",
+    fontWeight: 700,
+    margin: "0 0 4px 0",
+  },
+  resumeDesc: {
+    color: "rgba(255,255,255,0.75)",
+    fontSize: "14px",
+    margin: 0,
+    maxWidth: "480px",
+    lineHeight: 1.5,
+  },
+  resumeBtn: {
+    padding: "12px 28px",
+    background: "#fff",
+    color: "#764ba2",
+    border: "none",
+    borderRadius: "24px",
+    fontSize: "15px",
+    fontWeight: 700,
+    cursor: "pointer",
+    whiteSpace: "nowrap",
+    flexShrink: 0,
+  },
+  // ─────────────────────────────────────────────────────────────────────────
+
   features: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",

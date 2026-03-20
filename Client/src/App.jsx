@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Meeting from "./pages/Meeting";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ResumeScreening from "./components/ResumeScreening"; // ← ADD THIS
 
 export default function App() {
   return (
@@ -14,7 +15,7 @@ export default function App() {
           {/* Public routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          
+
           {/* Protected routes */}
           <Route
             path="/"
@@ -32,9 +33,18 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* ← ADD THIS — Resume Filter (protected) */}
+          <Route
+            path="/resumefilter"
+            element={
+              <ProtectedRoute>
+                <ResumeScreening />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
   );
 }
-
