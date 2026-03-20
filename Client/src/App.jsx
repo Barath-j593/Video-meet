@@ -1,5 +1,6 @@
 // This is App.jsx - see Home.jsx output for the main changes
 import { AuthProvider } from "./context/AuthContext";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import Meeting from "./pages/Meeting";
