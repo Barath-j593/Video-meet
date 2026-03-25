@@ -1,12 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 
 export default function Home() {
   const [roomId, setRoomId] = useState("");
+  const [findJobOpen, setFindJobOpen] = useState(false);
+  const [skillsText, setSkillsText] = useState("");
+  const [prediction, setPrediction] = useState("");
+  const [predictionError, setPredictionError] = useState("");
+  const [jobLinksShown, setJobLinksShown] = useState(false);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-
   const userName = user?.name || "Guest";
 
   function joinMeeting() {
@@ -26,7 +31,58 @@ export default function Home() {
     navigate("/login");
   }
 
+  async function onFindJobSubmit(event) {
+    event.preventDefault();
 
+    if (!skillsText.trim()) {
+      setPredictionError("Please describe your skills/interests.");
+      return;
+    }
+
+    setPredictionError("");
+    setPrediction("Searching...");
+
+    try {
+      const response = await axios.post("http://localhost:4000/api/job/predict-job", {
+        skills: skillsText,
+      });
+
+      const found = response.data?.jobRole || "Not found";
+      setPrediction(found);
+      setJobLinksShown(true);
+    } catch (error) {
+      console.error(error);
+      setPrediction("");
+      setPredictionError(
+        error.response?.data?.error || "Could not predict job role"
+      );
+      setJobLinksShown(false);
+    }
+  }
+
+  function clearFindJob() {
+    setFindJobOpen(false);
+    setSkillsText("");
+    setPrediction("");
+    setPredictionError("");
+    setJobLinksShown(false);
+  }
+
+  function linkedinTabList(role) {
+    const keywords = [
+      role,
+      `${role} developer`,
+      `${role} engineer`,
+      `${role} analyst`,
+    ];
+
+    return keywords.map((k) => ({
+      label: k,
+      url: `https://www.linkedin.com/jobs/search?keywords=${encodeURIComponent(
+        k
+      )}`,
+    }));
+  }
 
   return (
     <div style={styles.page}>
@@ -45,6 +101,76 @@ export default function Home() {
         <div style={styles.header}>
           <h1 style={styles.title}>🎥 Video Meet</h1>
           <p style={styles.subtitle}>Connect with anyone, anywhere</p>
+        </div>
+
+        <div style={styles.findJobCard}>
+          <h2 style={styles.cardTitle}>🔍 Find a Job Role</h2>
+          {!findJobOpen ? (
+            <button
+              style={styles.primaryBtn}
+              onClick={() => setFindJobOpen(true)}
+            >
+              Open Job Finder
+            </button>
+          ) : (
+            <form onSubmit={onFindJobSubmit} style={styles.findJobForm}>
+              <textarea
+                placeholder="Describe your skills and interests..."
+                value={skillsText}
+                onChange={(e) => setSkillsText(e.target.value)}
+                rows={4}
+                style={styles.textarea}
+              />
+              <div style={styles.findJobActions}>
+                <button type="submit" style={styles.primaryBtn}>
+                  Predict Role
+                </button>
+                <button
+                  type="button"
+                  onClick={clearFindJob}
+                  style={styles.secondaryBtn}
+                >
+                  Cancel
+                </button>
+              </div>
+
+              {prediction && (
+                <div style={styles.predictionBox}>
+                  Predicted Role: <strong>{prediction}</strong>
+                </div>
+              )}
+
+              {predictionError && (
+                <div style={styles.errorBox}>{predictionError}</div>
+              )}
+
+              {jobLinksShown && prediction && (
+                <button
+                  type="button"
+                  style={styles.linkedinBtn}
+                  onClick={() => setJobLinksShown(true)}
+                >
+                  Show LinkedIn job tabs
+                </button>
+              )}
+
+              {jobLinksShown && prediction && (
+                <div style={styles.linkedinTabs}>
+                  {linkedinTabList(prediction).map((item) => (
+                    <a
+                      key={item.url}
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={styles.linkedinLink}
+                    >
+                      {item.label}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </form>
+          )}
         </div>
 
         <div style={styles.cardContainer}>
@@ -308,5 +434,82 @@ const styles = {
     fontWeight: 600,
     cursor: "pointer",
     whiteSpace: "nowrap",
+  },
+  findJobCard: {
+    background: "rgba(255,255,255,0.18)",
+    border: "1px solid rgba(255, 255, 255, 0.35)",
+    borderRadius: "14px",
+    padding: "20px",
+    marginBottom: "30px",
+    color: "#fff",
+  },
+  findJobForm: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+    marginTop: "12px",
+  },
+  textarea: {
+    width: "100%",
+    minHeight: "100px",
+    borderRadius: "8px",
+    border: "1px solid #ddd",
+    padding: "10px",
+    fontSize: "14px",
+    resize: "vertical",
+  },
+  secondaryBtn: {
+    padding: "11px 18px",
+    background: "rgba(255,255,255,0.2)",
+    color: "#fff",
+    border: "1px solid rgba(255,255,255,0.4)",
+    borderRadius: "8px",
+    cursor: "pointer",
+  },
+  findJobActions: {
+    display: "flex",
+    gap: "12px",
+    flexWrap: "wrap",
+    alignItems: "center",
+  },
+  predictionBox: {
+    background: "rgba(0, 0, 0, 0.3)",
+    border: "1px solid #fff",
+    borderRadius: "8px",
+    color: "#fff",
+    padding: "8px 12px",
+    fontWeight: "bold",
+  },
+  errorBox: {
+    background: "rgba(255, 87, 87, 0.2)",
+    border: "1px solid #ff5d5d",
+    borderRadius: "8px",
+    padding: "8px 12px",
+    color: "#ffdddd",
+  },
+  linkedinBtn: {
+    marginTop: "8px",
+    padding: "10px 16px",
+    background: "#0073b1",
+    color: "#fff",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontWeight: 600,
+  },
+  linkedinTabs: {
+    marginTop: "12px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+  },
+  linkedinLink: {
+    padding: "10px 12px",
+    background: "rgba(255,255,255,0.9)",
+    border: "1px solid #ccc",
+    borderRadius: "8px",
+    color: "#064f80",
+    fontWeight: 600,
+    textDecoration: "none",
   },
 };
