@@ -33,12 +33,12 @@ let worker;
 // Whiteboard state per room: { imageDataUrl, accessList[], creatorSocketId, creatorUserId }
 const whiteboardState = new Map();
 
-(async () => {
-  // Connect to MongoDB
-  await connectDB();
-  
-  worker = await createWorker();
-})();
+if (process.env.NODE_ENV !== "test") {
+  (async () => {
+    await connectDB();
+    worker = await createWorker();
+  })();
+}
 
 // Socket.IO Authentication Middleware
 io.use(socketAuthMiddleware);
@@ -486,6 +486,13 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(4000, () => {
-  console.log("SFU server running on port 4000");
-});
+//const app = require('express')();
+// your routes here
+
+if (process.env.NODE_ENV !== "test") {
+  server.listen(4000, () => {
+    console.log("SFU server running on port 4000");
+  });
+}
+
+module.exports = app;

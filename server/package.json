@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
+  "jest": { "testEnvironment": "node" },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",

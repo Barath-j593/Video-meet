@@ -3,21 +3,56 @@ stages:
   - test
   - deploy
 
-build_job:
+variables:
+  NODE_VERSION: "18"
+
+build_client:
   stage: build
+  image: node:${NODE_VERSION}
   script:
-    - echo "Building the project..."
-    - mkdir build
-    - echo "Build complete"
+    - cd Client
+    - npm install
+    - npm run build
+    - npm run lint
+  artifacts:
+    paths:
+      - Client/dist/
+    expire_in: 1 hour
 
-test_job:
+build_server:
+  stage: build
+  image: node:${NODE_VERSION}
+  script:
+    - cd server
+    - npm install
+  cache:
+    paths:
+      - server/node_modules/
+
+test_server:
   stage: test
+  image: node:${NODE_VERSION}
   script:
-    - echo "Running tests..."
-    - echo "All tests passed"
-
-deploy_job:
+    - cd server
+    - npm install
+    - NODE_ENV=test npm test
+    
+test_client:
+  stage: test
+  image: node:18
+  script:
+    - cd Client
+    - npm install
+    - npm test
+  dependencies:
+    - build_client
+deploy:
   stage: deploy
   script:
-    - echo "Deploying project..."
-    - echo "Deployment successful"
+    - echo "Deploy to your server or cloud platform here"
+    - echo "For example, copy Client/dist/ and server/ to deployment target"
+  dependencies:
+    - build_client
+    - test_server
+  only:
+    - main  # or your deployment branch
