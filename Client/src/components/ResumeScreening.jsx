@@ -214,21 +214,52 @@ function JobSeekerView({ onSwitch }) {
     setDone(true);
   };
 
-  const Field = ({ k, placeholder, type = "text", wide = false }) => (
-    <div style={{ gridColumn: wide ? "span 2" : "span 1" }}>
-      <input type={type} placeholder={placeholder} value={form[k]} onChange={e => set(k, e.target.value)}
-        style={{ width: "100%", padding: "11px 14px", background: errors[k] ? "#2d1515" : "#0f172a", border: `1px solid ${errors[k] ? "#ef4444" : "#1e293b"}`, borderRadius: 8, color: "#e2e8f0", fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }}
-        onFocus={e => e.target.style.borderColor = "#7c3aed"}
-        onBlur={e => e.target.style.borderColor = errors[k] ? "#ef4444" : "#1e293b"} />
+  const renderField = (k, placeholder, type = "text", wide = false) => (
+    <div key={k} style={{ gridColumn: wide ? "span 2" : "span 1" }}>
+      <input
+        type={type}
+        placeholder={placeholder}
+        value={form[k]}
+        onChange={(e) => set(k, e.target.value)}
+        style={{
+          width: "100%",
+          padding: "11px 14px",
+          background: errors[k] ? "#2d1515" : "#0f172a",
+          border: `1px solid ${errors[k] ? "#ef4444" : "#1e293b"}`,
+          borderRadius: 8,
+          color: "#e2e8f0",
+          fontSize: 14,
+          fontFamily: "'DM Sans',sans-serif",
+          outline: "none",
+        }}
+        onFocus={(e) => (e.target.style.borderColor = "#7c3aed")}
+        onBlur={(e) => (e.target.style.borderColor = errors[k] ? "#ef4444" : "#1e293b")}
+      />
     </div>
   );
 
-  const TextArea = ({ k, placeholder, rows = 3 }) => (
-    <div style={{ gridColumn: "span 2" }}>
-      <textarea placeholder={placeholder} value={form[k]} onChange={e => set(k, e.target.value)} rows={rows}
-        style={{ width: "100%", padding: "11px 14px", background: "#0f172a", border: "1px solid #1e293b", borderRadius: 8, color: "#e2e8f0", fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none", resize: "vertical" }}
-        onFocus={e => e.target.style.borderColor = "#7c3aed"}
-        onBlur={e => e.target.style.borderColor = "#1e293b"} />
+  const renderTextArea = (k, placeholder, rows = 3) => (
+    <div key={k} style={{ gridColumn: "span 2" }}>
+      <textarea
+        placeholder={placeholder}
+        value={form[k]}
+        onChange={(e) => set(k, e.target.value)}
+        rows={rows}
+        style={{
+          width: "100%",
+          padding: "11px 14px",
+          background: "#0f172a",
+          border: "1px solid #1e293b",
+          borderRadius: 8,
+          color: "#e2e8f0",
+          fontSize: 14,
+          fontFamily: "'DM Sans',sans-serif",
+          outline: "none",
+          resize: "vertical",
+        }}
+        onFocus={(e) => (e.target.style.borderColor = "#7c3aed")}
+        onBlur={(e) => (e.target.style.borderColor = "#1e293b")}
+      />
     </div>
   );
 
@@ -285,30 +316,30 @@ function JobSeekerView({ onSwitch }) {
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             {step === 0 && (<>
-              <Field k="firstName" placeholder="First name *" />
-              <Field k="lastName" placeholder="Last name *" />
-              <Field k="email" placeholder="Email address *" type="email" wide />
-              <Field k="phone" placeholder="Phone number *" />
-              <Field k="location" placeholder="City, Country" />
-              <Field k="linkedin" placeholder="LinkedIn URL" wide />
-              <Field k="portfolio" placeholder="Portfolio / Website" wide />
+              {renderField("firstName", "First name *")}
+              {renderField("lastName", "Last name *")}
+              {renderField("email", "Email address *", "email", true)}
+              {renderField("phone", "Phone number *")}
+              {renderField("location", "City, Country")}
+              {renderField("linkedin", "LinkedIn URL", "text", true)}
+              {renderField("portfolio", "Portfolio / Website", "text", true)}
             </>)}
 
             {step === 1 && (<>
-              <Field k="currentRole" placeholder="Current / most recent role *" wide />
-              <Field k="currentCompany" placeholder="Company" />
-              <Field k="yearsExp" placeholder="Years of experience" type="number" />
-              <TextArea k="bio" placeholder="Professional summary — what you do and what you're looking for…" rows={4} />
+              {renderField("currentRole", "Current / most recent role *", "text", true)}
+              {renderField("currentCompany", "Company")}
+              {renderField("yearsExp", "Years of experience", "number")}
+              {renderTextArea("bio", "Professional summary — what you do and what you're looking for…", 4)}
             </>)}
 
             {step === 2 && (<>
-              <Field k="degree" placeholder="Degree (B.Sc, M.Sc, PhD…)" />
-              <Field k="field" placeholder="Field of study" />
-              <Field k="institution" placeholder="University / Institution" />
-              <Field k="gradYear" placeholder="Graduation year" type="number" />
-              <TextArea k="skills" placeholder="Skills, comma separated — React, Python, Leadership, SQL…" rows={3} />
-              <TextArea k="certifications" placeholder="Certifications, comma separated — AWS, PMP, CFA…" rows={2} />
-              <Field k="languages" placeholder="Languages spoken, comma separated" wide />
+              {renderField("degree", "Degree (B.Sc, M.Sc, PhD…)")}
+              {renderField("field", "Field of study")}
+              {renderField("institution", "University / Institution")}
+              {renderField("gradYear", "Graduation year", "number")}
+              {renderTextArea("skills", "Skills, comma separated — React, Python, Leadership, SQL…", 3)}
+              {renderTextArea("certifications", "Certifications, comma separated — AWS, PMP, CFA…", 2)}
+              {renderField("languages", "Languages spoken, comma separated", "text", true)}
             </>)}
 
             {step === 3 && (
