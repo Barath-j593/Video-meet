@@ -1,5 +1,5 @@
-// Load environment variables first
-require('dotenv').config();
+// Load environment variables first, independent of current working directory
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const { createWebRtcTransport } = require("./mediasoup/transport");
 
 const express = require("express");

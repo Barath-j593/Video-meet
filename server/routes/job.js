@@ -3,6 +3,15 @@ const router = express.Router();
 const { spawn } = require('child_process');
 const path = require('path');
 
+function resolvePythonExecutable() {
+  if (process.env.PYTHON_EXECUTABLE && process.env.PYTHON_EXECUTABLE.trim()) {
+    return process.env.PYTHON_EXECUTABLE.trim();
+  }
+
+  const venvPython = path.join(__dirname, '..', '..', '.venv', 'Scripts', 'python.exe');
+  return venvPython;
+}
+
 // POST /api/predict-job
 router.post('/predict-job', (req, res) => {
   const { skills } = req.body;
@@ -12,8 +21,9 @@ router.post('/predict-job', (req, res) => {
   }
 
   const scriptPath = path.join(__dirname, '..', 'predict_job.py');
+  const pythonExecutable = resolvePythonExecutable();
 
-  const pythonProcess = spawn('python', [scriptPath, skills]);
+  const pythonProcess = spawn(pythonExecutable, [scriptPath, skills]);
 
   let output = '';
   let errorOutput = '';
@@ -26,15 +36,30 @@ router.post('/predict-job', (req, res) => {
     errorOutput += data.toString();
   });
 
+  pythonProcess.on('error', (spawnError) => {
+    console.error('Failed to start Python process:', spawnError);
+    return res.status(500).json({
+      error: 'Prediction failed',
+      detail: `Unable to start Python: ${spawnError.message}`,
+    });
+  });
+
   pythonProcess.on('close', (code) => {
-    if (code !== 0 || errorOutput) {
+    if (code !== 0) {
       console.error('predict_job.py error', code, errorOutput);
       return res.status(500).json({ error: 'Prediction failed', detail: errorOutput.trim() });
     }
 
+    if (errorOutput.trim()) {
+      console.warn('predict_job.py warnings:', errorOutput.trim());
+    }
+
     const jobRole = output.trim();
     if (!jobRole) {
-      return res.status(500).json({ error: 'No prediction returned' });
+      return res.status(500).json({
+        error: 'No prediction returned',
+        detail: errorOutput.trim() || 'Empty output from prediction script',
+      });
     }
 
     res.json({ jobRole });
