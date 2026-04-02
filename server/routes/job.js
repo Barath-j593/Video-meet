@@ -27,6 +27,13 @@ router.post('/predict-job', (req, res) => {
 
   let output = '';
   let errorOutput = '';
+  let responded = false; // ← guard flag
+
+  const safeRespond = (status, body) => {
+    if (responded) return;
+    responded = true;
+    res.status(status).json(body);
+  };
 
   pythonProcess.stdout.on('data', (data) => {
     output += data.toString();
@@ -38,7 +45,7 @@ router.post('/predict-job', (req, res) => {
 
   pythonProcess.on('error', (spawnError) => {
     console.error('Failed to start Python process:', spawnError);
-    return res.status(500).json({
+    safeRespond(500, {
       error: 'Prediction failed',
       detail: `Unable to start Python: ${spawnError.message}`,
     });
@@ -47,7 +54,7 @@ router.post('/predict-job', (req, res) => {
   pythonProcess.on('close', (code) => {
     if (code !== 0) {
       console.error('predict_job.py error', code, errorOutput);
-      return res.status(500).json({ error: 'Prediction failed', detail: errorOutput.trim() });
+      return safeRespond(500, { error: 'Prediction failed', detail: errorOutput.trim() });
     }
 
     if (errorOutput.trim()) {
@@ -56,13 +63,13 @@ router.post('/predict-job', (req, res) => {
 
     const jobRole = output.trim();
     if (!jobRole) {
-      return res.status(500).json({
+      return safeRespond(500, {
         error: 'No prediction returned',
         detail: errorOutput.trim() || 'Empty output from prediction script',
       });
     }
 
-    res.json({ jobRole });
+    safeRespond(200, { jobRole });
   });
 });
 

@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 
 // ─── CONFIG — paste your free Gemini key here ────────────────────────────────
 // Get it free (no credit card) at: aistudio.google.com → Get API Key
-const GEMINI_KEY = "AIzaSyA12KjYqgtT8jzvfSlFFaDI9d4TiSl3Emg";
+const GEMINI_KEY = "AIzaSyD54GXR74ajA_HJMdO4_GZATUnmFOTencA";
 // Remove the space and add the model endpoint
 // Use v1beta for Gemini 1.5 Flash to ensure multimodal (PDF) support
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`;
