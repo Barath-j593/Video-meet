@@ -22,6 +22,12 @@ Professional WebRTC-based video conferencing application with group chat, privat
 - Neon dark theme with responsive layout
 - JWT-based authentication for API and Socket.IO
 
+- ML-powered features and experiments:
+	- Job predictor / resume-to-job matching model (training artifacts in `mlruns/`)
+	- Resume scoring & suggestions, and simple job-recommendation utilities
+	- Example notebooks and scripts for training/evaluation included
+	- Models and metadata stored under `mlruns/` and example notebooks at the repo root
+
 ## Prerequisites
 
 - Node.js (v16+ recommended)
