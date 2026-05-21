@@ -1,0 +1,154 @@
+/* 
+  MODERN NEON THEME COLOR REFERENCE
+  Used in Meeting-Modern.css
+*/
+
+:root {
+  /* PRIMARY CYAN - Main accent color */
+  --primary: #00d9ff;           /* Bright cyan for buttons, borders */
+  --primary-dark: #00b8d4;      /* Darker cyan for depth */
+  
+  /* SECONDARY MAGENTA - Warning/Active states */
+  --secondary: #ff006e;         /* Bright magenta */
+  --secondary-light: #ff1a8c;   /* Lighter magenta for variations */
+  
+  /* ACCENT GREEN - Success/Feature indication */
+  --accent: #00f5ff;            /* Bright cyan accent */
+  --accent-green: #00ff88;      /* Neon green for secondary actions */
+  
+  /* DARK BACKGROUNDS - Professional dark theme */
+  --dark-bg: #0a0e27;           /* Very dark navy (main background) */
+  --dark-bg-light: #1a1f3a;     /* Lighter navy (header/footer) */
+  --card-bg: #151a32;           /* Card background navy */
+  
+  /* BORDERS & TEXT */
+  --border: rgba(0, 217, 255, 0.1);  /* Cyan with transparency */
+  --text-primary: #ffffff;      /* Main text */
+  --text-secondary: rgba(255, 255, 255, 0.7); /* Secondary text */
+}
+
+/* ============================
+   COLOR USAGE GUIDE
+   ============================ */
+
+/* BUTTONS */
+.control-btn {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #000;
+  box-shadow: 0 0 15px rgba(0, 217, 255, 0.3);
+}
+
+.control-btn.active-warning {
+  background: linear-gradient(135deg, var(--secondary), var(--secondary-light));
+  box-shadow: 0 0 30px rgba(255, 0, 110, 0.6);
+}
+
+.control-btn.active-orange {
+  background: linear-gradient(135deg, var(--accent-green), #00ff88);
+  box-shadow: 0 0 30px rgba(0, 255, 136, 0.6);
+}
+
+/* BORDERS & DIVIDERS */
+.video-card {
+  border: 2px solid var(--border);
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
+}
+
+.meeting-header {
+  border-bottom: 2px solid var(--border);
+  box-shadow: 0 4px 24px rgba(0, 217, 255, 0.1);
+}
+
+/* TEXT & LABELS */
+.meeting-title {
+  color: var(--accent);
+  text-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+}
+
+.video-label {
+  color: var(--accent);
+  border: 1px solid var(--primary);
+}
+
+/* SCREEN SHARE */
+.screen-share-container {
+  border: 2px solid var(--primary);
+  box-shadow: 0 0 30px rgba(0, 217, 255, 0.4);
+}
+
+.screen-label {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: #000;
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.6);
+}
+
+/* CHAT MESSAGES */
+.message.own {
+  background: linear-gradient(135deg, rgba(0, 217, 255, 0.8), rgba(0, 245, 255, 0.8));
+  color: #000;
+  box-shadow: 0 0 15px rgba(0, 217, 255, 0.4);
+}
+
+.message.other {
+  background: rgba(21, 26, 50, 0.8);
+  border: 1px solid var(--border);
+  box-shadow: 0 0 10px rgba(0, 217, 255, 0.2);
+}
+
+.message-sender {
+  color: var(--accent);
+}
+
+/* BADGES */
+.badge.muted,
+.badge.camera-off {
+  background: linear-gradient(135deg, var(--secondary), var(--secondary-light));
+  box-shadow: 0 0 20px rgba(255, 0, 110, 0.5);
+}
+
+.badge.sharing {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.6);
+}
+
+/* ============================
+   HEX COLOR VALUES QUICK REFERENCE
+   ============================ */
+
+#00d9ff - Primary Cyan (buttons, borders)
+#00b8d4 - Darker Cyan
+#ff006e - Magenta Warning
+#ff1a8c - Light Magenta
+#00f5ff - Bright Cyan Accent
+#00ff88 - Neon Green
+#0a0e27 - Dark Navy Background
+#1a1f3a - Lighter Navy
+#151a32 - Card Background
+#ffffff - White Text
+rgba(0, 217, 255, 0.1) - Cyan Border
+rgba(255, 255, 255, 0.7) - Secondary Text
+rgba(0, 0, 0, 0.4) - Semi-transparent Black
+
+/* ============================
+   GRADIENT COMBINATIONS
+   ============================ */
+
+Primary Gradient:
+  linear-gradient(135deg, #00d9ff, #00f5ff)
+  → Cyan to bright cyan
+
+Warning Gradient:
+  linear-gradient(135deg, #ff006e, #ff1a8c)
+  → Magenta to light magenta
+
+Success Gradient:
+  linear-gradient(135deg, #00ff88, #00f5ff)
+  → Green to bright cyan
+
+Mixed Gradient:
+  linear-gradient(135deg, #00d9ff, #ff006e)
+  → Cyan to magenta (used for screen labels)
+
+Background Gradient:
+  linear-gradient(135deg, #0a0e27, #1a1f3a)
+  → Dark navy to lighter navy

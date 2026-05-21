@@ -1,0 +1,14 @@
+artifact_uri: file:C:\Video-meet\server\..\mlruns/401549975093242622/651784e68bf84158aa789abefe03d23d/artifacts
+end_time: 1774501146847
+entry_point_name: ''
+experiment_id: '401549975093242622'
+lifecycle_stage: active
+run_id: 651784e68bf84158aa789abefe03d23d
+run_name: predict
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1774501146736
+status: 3
+tags: []
+user_id: Barath J

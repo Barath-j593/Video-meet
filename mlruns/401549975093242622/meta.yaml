@@ -1,0 +1,7 @@
+artifact_location: file:C:\Video-meet\server\..\mlruns/401549975093242622
+creation_time: 1774500087175
+experiment_id: '401549975093242622'
+last_update_time: 1774500087175
+lifecycle_stage: active
+name: job-role-prediction
+workspace: default
